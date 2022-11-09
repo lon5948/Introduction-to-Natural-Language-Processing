@@ -1,3 +1,7 @@
+#Author: Ming-Rung Li
+#Student ID: 109550031
+#HW ID: HW1
+
 import numpy as np
 import pandas as pd
 import spacy
@@ -8,34 +12,38 @@ nlp = spacy.load("en_core_web_sm")
 SUBJECTTAG = ["nsubj", "nsubjpass", "csubj", "csubjpass", "agent", "expl"]  
 OBJECTTAG = ["dobj", "pobj", "dative", "attr", "oprd"]  
 
+def add_conjunction(ret):
+    conjunction = []
+    for r in ret:
+        conjunction.extend(r.conjuncts)
+    ret.extend(conjunction)
+    return ret
+
 def get_subject_phrase(doc, prevID, verbID):
     subret = []
+    doc = nlp(doc)
     for token in doc[prevID+1:verbID]:
         if token.dep_ in SUBJECTTAG:
             subret.append(token)
     if len(subret) != 0:
-        subret_conjunction = []
-        for sr in subret:
-            subret_conjunction.extend(sr.conjuncts)
-        subret.extend(subret_conjunction)
+        subret = add_conjunction(subret)
     return subret
 
 def get_object_phrase(doc, verbID):
     objret = []
+    doc = nlp(doc)
     for token in doc[verbID+1:]:
         if token.dep_ in OBJECTTAG:
             objret.append(token)
         elif token.pos_ == 'VERB':
             break
     if len(objret) != 0:
-        objret_conjunction = []
-        for obr in objret:
-            objret_conjunction.extend(obr.conjuncts) 
-        objret.extend(objret_conjunction)
+        objret = add_conjunction(objret)
     return objret
 
 def find_verbs(doc):
     verbs = []
+    doc = nlp(doc)
     for token in doc:
         if token.pos_ == 'VERB' or token.pos_ == 'AUX':
             verbs.append(token)
@@ -62,11 +70,8 @@ def main():
         verbID = 0
         for verb in find_verbs(doc):
             verbID = verb.i
-            
             subj = get_subject_phrase(doc, prevID, verbID)
-            
             obj = get_object_phrase(doc, verbID)
-            
             if subj != None:
                 for sub in subj:
                     s.append(sub.text)
@@ -75,7 +80,6 @@ def main():
                     o.append(ob.text)
             if verb != None:
                 v.append(verb.text)
-
             prevID = verb.i
         
         a = word_in_sen(s, str(data["subject"][row]))
