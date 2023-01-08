@@ -2,6 +2,7 @@ import json
 import os
 import numpy as np
 import pandas as pd
+import random
 from tqdm import tqdm
 
 from transformers import BertTokenizer, BertForSequenceClassification, BertConfig, AdamW
@@ -20,10 +21,10 @@ def compute_accuracy(y_pred, y_target):
 def load_data():
     D = [[], [], []]
     for sid in range(3):
-        with open("../data/"+["train_HW3dataset.json", "dev_HW3dataset.json", "test_HW3dataset.json"][sid], "r", encoding="utf8") as f:
+        with open("data/"+["train_HW3dataset.json", "dev_HW3dataset.json", "test_HW3dataset.json"][sid], "r", encoding="utf8") as f:
             data = json.load(f)
-        #if sid == 0:
-        #    random.shuffle(data)
+        if sid == 0:
+            random.shuffle(data)
         for i in range(len(data)):
             for j in range(len(data[i][1])):
                 d = ['\n'.join(data[i][0]), data[i][1][j]["question"]]
@@ -127,7 +128,7 @@ def main():
         if total_acc >= best_acc:
             torch.save(model.state_dict(), "model_best.pt")
             best_acc = total_acc
-
+    
     # dev part
     dev_examples = create_examples(dataset[1])
     dev_data = TaskDataset(dev_examples, tokenizer)
@@ -156,14 +157,14 @@ def main():
     total_dev_loss /= count
     print(f'Loss = {total_loss}')
     print(f'Accuracy = {total_acc}')
-
+    
     # testing part
     ans = pd.DataFrame(columns=["index","answer"])
     ans_index = 0
 
     test_examples = create_examples(dataset[2])
     test_data = TaskDataset(test_examples, tokenizer)
-    test_loader = DataLoader(test_data, batch_size=4)
+    test_loader = DataLoader(test_data, batch_size=2)
 
     model.load_state_dict(torch.load("model_best.pt"))
     model.eval()
@@ -172,12 +173,12 @@ def main():
         test_input_ids = torch.stack(test_dict['input_ids'],dim=1).to(device)
         test_token_type_ids = torch.stack(test_dict['token_type_ids'],dim=1).to(device)
         test_attention_mask = torch.stack(test_dict['attention_mask'],dim=1).to(device)
-        test_outputs = model(input_ids=test_input_ids, token_type_ids=test_token_type_ids, attention_mask=test_attention_mask)
-        _, logits = test_outputs[:2]
+        output = model(input_ids=test_input_ids, token_type_ids=test_token_type_ids, attention_mask=test_attention_mask)
+        logits = output[0]
         logits = logits.detach().cpu().numpy()
         for i in range(len(logits)):
             ans.loc[int(ans_index)] = [int(ans_index),np.argmax(logits[i])+1]
             ans_index += 1
-
+    ans.to_csv('predict.csv', index=False)
 if __name__ == "__main__":
     main()
