@@ -8,3 +8,8 @@ NYCU 110 下 / professor: 顏安孜
 ### hw2
 - Sentiment analysis with neural network
 - [Kaggle](https://www.kaggle.com/t/964d464205694362a12061ddc60b1e47)
+
+### hw3
+- Machine Reading Comprehension with neural network. 
+- Given an article, a question and a set of choices, determine which choice is the answer.
+- [Kaggle](https://www.kaggle.com/t/b7ab308a6e6a411ebbbbeba0a2e40189)
