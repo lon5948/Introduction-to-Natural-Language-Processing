@@ -13,3 +13,8 @@ NYCU 110 下 / professor: 顏安孜
 - Machine Reading Comprehension with neural network. 
 - Given an article, a question and a set of choices, determine which choice is the answer.
 - [Kaggle](https://www.kaggle.com/t/b7ab308a6e6a411ebbbbeba0a2e40189)
+
+### final
+- Fact Checking with neural network. 
+- Use the sentence of these articles as evidence to prove that the third claim is true.
+- [Kaggle](https://www.kaggle.com/competitions/2022-inlp-final)
